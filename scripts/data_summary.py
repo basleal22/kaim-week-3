@@ -47,21 +47,31 @@ def num_cat_visual(data):
     categorical_cols=data.select_dtypes(include=['object','category'])
     numerical_cols=data.select_dtypes(include=['int64','float64'])
     #plot histogram for numerical columns
-    plt.figure(figsize=(10,8))
-    for col in numerical_cols:
-        sns.histplot(data[col],kde=True,color='blue')
-    plt.title(f'distribution solumns')
-    plt.xlabel(col)
-    plt.ylabel('frequency')
+    # Select numerical columns
+    # Create a figure and axis for the plot
+    plt.figure(figsize=(10, 6))
+    # Plot the count of non-null values for each numerical column
+    data[numerical_cols.columns].count().plot(kind='bar')
+    # Add labels and title
+    plt.xlabel('Column Names')
+    plt.ylabel('Non-null Count')
+    plt.title('Non-null Counts for Numerical Columns')
+    # Show the plot
+    plt.xticks(rotation=90)
+    plt.tight_layout()
     plt.show()
     #plot bar charts for categorical columns
-    plt.figure(figsize=(8,6))
-    for col in categorical_cols:
-        data[col].value_counts().plot(kind='bar',color= 'green')#Use the value_counts() method to calculate the frequency of each category.
-    plt.title(f'distribution of columns')
-    plt.xlabel('columns')
-    plt.ylabel('count')
+    # Get the value counts for the column
+    category_counts = data[categorical_cols].value_counts()
+    # Plot the distribution
+    plt.figure(figsize=(12, 6))
+    sns.barplot(x=category_counts.index, y=category_counts.values, palette='viridis')
+    plt.title(f'Distribution of {categorical_cols}', fontsize=16)
+    plt.xlabel(f'{categorical_cols}', fontsize=14)
+    plt.ylabel('Count', fontsize=14)
+    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
     plt.show()
+
 def bivariate_analysis(data):
     plt.figure(figsize=(10,8))
     sns.scatterplot(data=data,x='TotalPremium',y='TotalClaims',hue='ZipCode',palette='viridis',alpha=0.7)
@@ -69,4 +79,11 @@ def bivariate_analysis(data):
     plt.xlabel('TotalPremium')
     plt.ylabel('TotalClaims')
     plt.legend(bbox_to_anchor=(1.05,1),loc='upper left',title='ZipCode')
+    plt.show()
+def correlation_matrix(data):
+    correlation_data=data[['TotalPremium','TotalClaims']].corr()
+    #plot the matrix
+    plt.figure(figsize=(10,8))
+    sns.heatmap(correlation_data,annot=True,cmap='coolwarm',fmt='.2f')
+    plt.title("Correlation Matrix: TotalPremium and TotalClaims")
     plt.show()
