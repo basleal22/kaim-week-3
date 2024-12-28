@@ -61,24 +61,34 @@ def num_cat_visual(data):
     plt.tight_layout()
     plt.show()
     #plot bar charts for categorical columns
-    # Get the value counts for the column
-    category_counts = data[categorical_cols].value_counts()
-    # Plot the distribution
-    plt.figure(figsize=(12, 6))
-    sns.barplot(x=category_counts.index, y=category_counts.values, palette='viridis')
-    plt.title(f'Distribution of {categorical_cols}', fontsize=16)
-    plt.xlabel(f'{categorical_cols}', fontsize=14)
-    plt.ylabel('Count', fontsize=14)
-    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+    # Sampling the data for visualization
+    sampled_data = data.sample(100000, random_state=42)  # Sample 10,000 rows
+
+    # Create a figure for the plot
+    plt.figure(figsize=(10, 6))
+
+    # Plot the count of non-null values for each categorical column
+    categorical_cols.notnull().sum().plot(kind='bar', color='skyblue')
+
+    # Add labels and title
+    plt.xlabel('Column Names')
+    plt.ylabel('Non-null Count')
+    plt.title('Non-null Counts for Categorical Columns')
+
+    # Adjust the x-axis for better readability
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+
+    # Show the plot
     plt.show()
 
 def bivariate_analysis(data):
     plt.figure(figsize=(10,8))
-    sns.scatterplot(data=data,x='TotalPremium',y='TotalClaims',hue='ZipCode',palette='viridis',alpha=0.7)
-    plt.title('TotalPremium vs TotalClaims by ZipCode')
+    sns.scatterplot(data=data,x='TotalPremium',y='TotalClaims',hue='Country',palette='viridis',alpha=0.7)
+    plt.title('TotalPremium vs TotalClaims by Country')
     plt.xlabel('TotalPremium')
     plt.ylabel('TotalClaims')
-    plt.legend(bbox_to_anchor=(1.05,1),loc='upper left',title='ZipCode')
+    plt.legend(bbox_to_anchor=(1.05,1),loc='upper left',title='Country')
     plt.show()
 def correlation_matrix(data):
     correlation_data=data[['TotalPremium','TotalClaims']].corr()
@@ -86,4 +96,51 @@ def correlation_matrix(data):
     plt.figure(figsize=(10,8))
     sns.heatmap(correlation_data,annot=True,cmap='coolwarm',fmt='.2f')
     plt.title("Correlation Matrix: TotalPremium and TotalClaims")
+    plt.show()
+def data_comparision(data):
+    # Aggregating data by ZipCode or geographical column
+    geo_col = 'Country' 
+    columns_to_compare = ['CoverType', 'TotalPremium', 'make']  
+
+    # Create a summarized dataset
+    geo_summary = data.groupby(geo_col)[columns_to_compare].agg(
+    {
+        'CoverType': lambda x: x.mode()[0] if not x.mode().empty else None,  # Most common CoverType
+        'TotalPremium': 'mean',  # Average premium
+        'make': lambda x: x.mode()[0] if not x.mode().empty else None  # Most common auto make
+    }).reset_index()
+    # Plotting Average TotalPremium by Country
+    plt.figure(figsize=(16, 6))
+    sns.barplot(x=geo_summary[geo_col], y=geo_summary['TotalPremium'], palette='coolwarm')
+
+    plt.title('Average TotalPremium by Country', fontsize=16)
+    plt.xlabel('Country', fontsize=14)
+    plt.ylabel('Average TotalPremium', fontsize=14)
+    plt.xticks(rotation=45)
+    plt.show()
+def outliers_detection(data):
+    outliers_dict={}
+    numerical_columns=data.select_dtypes(include=['int64','float64'])
+    for cols in numerical_columns.columns:
+        Q1=np.percentile(data[cols],25)
+        Q3=np.percentile(data[cols],75)
+        IQR=Q3-Q1
+        #calculate bounds
+        lower_bound=Q1-1.5*IQR
+        upper_bound=Q3+1.5*IQR
+        outliers = data[cols][(data[cols] < lower_bound) | (data[cols] > upper_bound)]
+        outliers_dict[cols] = outliers
+        outliers_df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in outliers_dict.items()]))
+    # Plot box plots
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(data=outliers_df, palette="Set2", width=0.5)
+
+    # Add labels and title
+    plt.title("Box Plot with Outliers Across Numerical Columns", fontsize=16)
+    plt.xlabel("Columns", fontsize=14)
+    plt.ylabel("Values", fontsize=14)
+
+    # Show the plot
+    plt.xticks(rotation=45)  # Rotate column names for readability
+    plt.tight_layout()
     plt.show()
