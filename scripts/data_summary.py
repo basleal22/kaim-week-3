@@ -62,3 +62,11 @@ def num_cat_visual(data):
     plt.xlabel('columns')
     plt.ylabel('count')
     plt.show()
+def bivariate_analysis(data):
+    plt.figure(figsize=(10,8))
+    sns.scatterplot(data=data,x='TotalPremium',y='TotalClaims',hue='ZipCode',palette='viridis',alpha=0.7)
+    plt.title('TotalPremium vs TotalClaims by ZipCode')
+    plt.xlabel('TotalPremium')
+    plt.ylabel('TotalClaims')
+    plt.legend(bbox_to_anchor=(1.05,1),loc='upper left',title='ZipCode')
+    plt.show()
