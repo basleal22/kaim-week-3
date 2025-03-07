@@ -27,13 +27,13 @@ def test_risk_across_PostalCode(data):
 def profit_difference_between_postal_codes(data):
     """test if there are significant profit differences across postalcode.
     Null hypothesis:there are no profit differences across postalcode."""
-    data['margin']=data['Premium']-data['TotalClaims']
+    data['margin']=data['TotalPremium']-data['TotalClaims']
     margin_postal = [data[data['PostalCode']==p]['margin']for p in data['PostalCode'].unique()]
     result = f_oneway(*margin_postal)
     return {
         "test" : "ANOVA",
         "Null Hypothesis" : "no profit differences across postalcode.",
-        "f-statistic" : result.statostoc,
+        "f-statistic" : result.statistic,
         "p-value" : result.pvalue,
         "reject null": result.pvalue <0.05
     }
