@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 #import tensorflow as tf
-#from sklearn.preprocessing import MinMaxScaler
-#from sklearn.model_selection import train_test_split
-#from sklearn.ensemble import RandomForrestRegressor
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForrestRegressor
 def preprocess(data):
     categorical=[]
     numerical=[]
@@ -13,3 +13,5 @@ def preprocess(data):
         elif data[column].dtype in ['int64','float64']:
             numerical.append(column) 
     return numerical,categorical
+def train_test_splitter(x,y):
+    x_train,x_test,y_train,y_test=train_test_split()
