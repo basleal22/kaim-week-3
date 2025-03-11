@@ -1,52 +1,77 @@
 import pandas as pd
-from scipy.stats import f_oneway, ttest_ind
-def test_risk_across_province(data):
-    """Test if there are significant risk differences (Total Claims) across provinces.
-        Null Hypothesis: There are no risk differences across provinces."""
-    province_group=[data[data['Province']==p]['TotalClaims'] for p in data['Province'].unique()]
-    result= f_oneway(*province_group)
-    return {
-        "test":"ANOVA",
-        "Null Hypothesis": "No risk difference across provinces",
-        "F-statistic" : result.statistic,
-        "p-value" : result.pvalue,
-        "Reject Null": result.pvalue < 0.05
-    }
-def test_risk_across_PostalCode(data):
-    """test if there are significant risk differences (total claims) across PostalCode.
-    Null hypothesis: there are no risk differences across provinces."""
-    postal_group=[data[data['PostalCode']==p]['TotalClaims'] for p in data['PostalCode'].unique()]
-    result = f_oneway(*postal_group)
-    return {
-        "test":"ANOVA",
-        "Null Hypothesis": "No risk difference across postal code",
-        "f-statistic" : result.statistic,
-        "p-value": result.pvalue,
-        'reject null':result.pvalue < 0.05
-    }
-def profit_difference_between_postal_codes(data):
-    """test if there are significant profit differences across postalcode.
-    Null hypothesis:there are no profit differences across postalcode."""
-    data['margin']=data['TotalPremium']-data['TotalClaims']
-    margin_postal = [data[data['PostalCode']==p]['margin']for p in data['PostalCode'].unique()]
-    result = f_oneway(*margin_postal)
-    return {
-        "test" : "ANOVA",
-        "Null Hypothesis" : "no profit differences across postalcode.",
-        "f-statistic" : result.statistic,
-        "p-value" : result.pvalue,
-        "reject null": result.pvalue <0.05
-    }
-def risk_difference_Women_Men(data):
-    """test if there are significant risk differences (total claims) between men and women.
-    Null hypothesis: there are no risk differences between men and women."""
-    male_group=data[data['Gender']=='Male']['TotalClaims']
-    female_group = data[data['Gender']=='Female']['TotalClaims']
-    result = ttest_ind(male_group,female_group,equal_var=False)
-    return {
-            "Test": "T-Test",
-            "Null Hypothesis": "No significant risk differences between women and men",
-            "T-Statistic": result.statistic,
-            "p-Value": result.pvalue,
-            "Reject Null": result.pvalue < 0.05
-        }
+from scipy.stats import f_oneway,ttest_ind
+
+def risk_across_province(data):
+    """
+    test to see if there are risk differences(total claims) across provinces
+    using A/B hypothesis test: if it results in Null hypothesis according to our parameter,
+                               then the conclusion will be that there is no difference
+    """
+    #step 1: organize (group by) province 
+    province_groups=[data[data['Province']==p]['TotalClaims'] for p in data['Province'].unique()]
+    #step 2: use anova method to return the p values and statistics(with the f_oneway method)
+    results = f_oneway(*province_groups)
+    #step 3: return a dictionary of values having test type, pvalue, f-statistics 
+    return {"test":"ANOVA",
+            "Null Hypothesis":"No risk difference across provinces",
+            "p-value":results.pvalue,
+            "f-statistics":results.statistic,
+            "reject null":results.pvalue < 0.05
+            }
+def risk_between_postalcodes(data):
+    """
+    test to see if there are risk differences(Total claims) across postalcodes
+    using A/B hypothesis test: if it results in Null hypothesis according to our parameter,
+                               then the conclusion will be that there is no difference
+    """
+    #step 1: organize (group by) postal code
+    postalcode_groups=[data[data['PostalCode']==po]['TotalClaims'] for po in data['PostalCode'].unique()]#using unique so that we want to filter redundant postalcode values
+    #step 2: use anova method to return the p values and statistics
+    results = f_oneway(*postalcode_groups)
+    #step 3: return a disctionary of values having test type, pvalue, f-statistics...
+    return {"test":"ANOVA",
+            "Null Hypothesis":"No risk difference across PostalCodes",
+            "p-value":results.pvalue,
+            "f-statistics":results.statistic,
+            "reject null":results.pvalue < 0.05
+            }
+def marigin_between_postalcode(data):
+    """
+    test to see if there are margin differences(profit) across postalcodes
+    using A/B hypothesis test: if it results in Null hypothesis according to our parameter,
+                               then the conclusion will be that there is no difference
+    """
+    #step 1: create a marigin(our profit) column by subtracting premium to totalclaim
+    data['Margin']=data['TotalPremium']-data['TotalClaims']
+    #step 2: organize (group by) postal code
+    postalcode_groups=[data[data['PostalCode']==po]['Margin'] for po in data['PostalCode'].unique()]#using unique so that we want to filter redundant postalcode values
+    #step 3: use anova method to return the p values and statistics
+    results = f_oneway(*postalcode_groups)
+    #step 4: return a dictionary of values having test type, pvalue, f-statistics...
+    return {"test":"ANOVA",
+            "Null Hypothesis":"No profit difference across PostalCodes",
+            "p-value":results.pvalue,
+            "f-statistics":results.statistic,
+            "reject null":results.pvalue < 0.05
+            }
+def risk_across_gender(data):
+     
+     """
+    test to see if there are risk differences(totalclaims) across gender
+    using A/B hypothesis test: if it results in Null hypothesis according to our parameter,
+                               then the conclusion will be that there is no difference
+    """
+    #step 1: create male and female groups from the gender column
+     male_group=data[data['Gender']=='Male']['TotalClaims']
+     female_group=data[data['Gender']=='Female']['TotalClaims']
+     #step 2: use anova method(ttest_ind) to compare the mean between the two datas(total claims)
+     results = ttest_ind(male_group,female_group, equal_var=False)
+     #step 3: return a dictionary of values having test type, pvalue, f-statistics...
+     return {"test":"ANOVA",
+            "Null Hypothesis":"No profit difference across PostalCodes",
+            "p-value":results.pvalue,
+            "f-statistics":results.statistic,
+            "reject null":results.pvalue < 0.05
+            }
+    
+
