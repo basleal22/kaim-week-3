@@ -1,5 +1,7 @@
 pandas
+lime
+shap
 numpy
-matplotlib
 scikit-learn
+matplotlib
 seaborn

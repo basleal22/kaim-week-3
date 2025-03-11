@@ -1,3 +1,5 @@
+models
 data
-scripts/__pycache__
 venv
+scripts/__pycache__
+.dvc
